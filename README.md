@@ -17,7 +17,7 @@
 
 ---
 
-## 📋 Executive Summary
+## Executive Summary
 
 This project constitutes a **Global Scale Policy Feasibility Study** conducted in support of the January 2026 Ministerial Decree recognising the Test of Proficiency in Korean (TOPIK) as a formal graduation credit within Vietnam's national secondary education framework — a policy decision affecting an estimated **1.1 million students** across the Vietnamese national curriculum.
 
@@ -34,7 +34,7 @@ The study was structured as a strategic pilot (N=5,114) designed to generate sta
 
 ---
 
-## 🏗️ Project Architecture
+## Project Architecture
 
 ```
 topik-policy-analysis/
@@ -56,7 +56,7 @@ topik-policy-analysis/
 
 ---
 
-## 📐 Statistical Methodology
+## Statistical Methodology
 
 This study applies a multi-stage quantitative pipeline consistent with **ADSp (Advanced Data Science Professional)** and **SQLD (SQL Developer)** certification standards.
 
@@ -107,7 +107,7 @@ This study applies a multi-stage quantitative pipeline consistent with **ADSp (A
 
 ---
 
-## 📊 Key Strategic Findings
+## Key Strategic Findings
 
 ### Finding 1 — Equitable Instrument Design
 
@@ -142,7 +142,7 @@ A **78.8% pilot approval rate** on exam breadth and diversity (Question Diversit
 
 ---
 
-## 📈 Visualisations
+## Visualisations
 
 All figures are generated programmatically and saved to `/outputs/`. The pipeline produces seven publication-quality charts.
 
@@ -166,7 +166,7 @@ The flat trajectory of Listening, Reading, and Writing appropriateness scores ac
 
 ---
 
-## ⚙️ Technical Implementation
+## Technical Implementation
 
 ### Environment
 
@@ -209,7 +209,7 @@ Likert-scale responses are bounded [1,5] and frequently right- or left-skewed. M
 
 ---
 
-## 🔒 Data Integrity Statement
+## Data Integrity Statement
 
 The dataset (N=5,114) was collected under the oversight of the Ministry of Education, Republic of Korea, as part of a structured nationwide pilot study targeting Vietnamese secondary school students. The following data governance protocols were applied throughout this analysis:
 
@@ -222,7 +222,7 @@ The dataset (N=5,114) was collected under the oversight of the Ministry of Educa
 
 ---
 
-## 📚 References
+## References
 
 Brown, L. D., Cai, T. T., & DasGupta, A. (2001). Interval estimation for a binomial proportion. *Statistical Science, 16*(2), 101–133.
 
@@ -234,7 +234,7 @@ Nunnally, J. C. (1978). *Psychometric theory* (2nd ed.). McGraw-Hill.
 
 ---
 
-## 👤 Author
+## Author
 
 **JEONG HYUNWOO**
 BSc Quantitative Social Analysis, Mathematics Minor — HKUST
