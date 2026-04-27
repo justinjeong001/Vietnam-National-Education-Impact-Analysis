@@ -236,7 +236,7 @@ Nunnally, J. C. (1978). *Psychometric theory* (2nd ed.). McGraw-Hill.
 
 ## 👤 Author
 
-**[Your Name]**
+**JEONG HYUNWOO**
 BSc Quantitative Social Analysis, Mathematics Minor — HKUST
 Certifications: ADSp · SQLD
 
