@@ -291,9 +291,10 @@ def approval_projection(df: pd.DataFrame,
     National Approval Projection.
 
     Metric: Question Diversity Rating ≥ 4 (strong positive)
-    Rationale: This dimension returned 78.8% approval — the strongest signal
-    in the dataset. It reflects demand for a varied, multi-competency test,
-    which aligns directly with TOPIK's graduation credit proposal.
+    Rationale: This dimension returned the highest approval rate across all
+    score dimensions in the dataset. It reflects demand for a varied,
+    multi-competency test, which aligns directly with TOPIK's graduation
+    credit proposal. Exact rate is computed live from the cleaned dataset.
 
     Wilson Score CI used for policy-grade interval accuracy.
     Also reports L/R/W neutral-positive (≥3.0) as secondary metric.
@@ -455,13 +456,24 @@ def ols_regression(df: pd.DataFrame) -> dict:
     Returns coefficients, t-stats, p-values, R², Adj-R², standardised betas.
 
     ── Honest reporting ─────────────────────────────────────────────────────
-    R² = 0.010 (1%). Low overall explained variance: most of the variation
-    in GCS comes from individual student factors not captured in this survey
-    (motivation, prior education quality, etc.). However, instruction_clarity
-    and question_count are the two *statistically significant* controllable
-    levers, with p < 0.001. Policy recommendation is therefore conservative:
-    focus implementation resources on clarity of instruction and exam
-    structure, with expectation of modest but real aggregate gains.
+    R² = 0.0097 (approx 1%). Low overall explained variance: most of the
+    variation in GCS comes from individual student factors not captured in
+    this survey (motivation, prior education quality, etc.). However,
+    instruction_clarity and question_count are the two *statistically
+    significant* controllable levers, with p < 0.001. Policy recommendation
+    is therefore conservative: focus implementation resources on clarity of
+    instruction and exam structure, with expectation of modest but real
+    aggregate gains.
+
+    ── Note on GCS weights ──────────────────────────────────────────────────
+    GCS weights (L=0.30, R=0.30, W=0.25, S=0.15) are survey instrument
+    weights designed to give proportional emphasis to the four assessed
+    dimensions. Note that TOPIK does not include a speaking component
+    (TOPIK I: Listening + Reading; TOPIK II: Listening + Reading + Writing).
+    The Speaking dimension in this survey captures student perception of
+    how a hypothetical speaking section would be assessed — it is a survey
+    construct, not a reflection of actual TOPIK scoring structure. The GCS
+    is therefore a holistic perception index, not a proxy for TOPIK scores.
     """
     print("=" * 70)
     print("  MODULE 2 — MULTIPLE REGRESSION: Drivers of Exam Perception")
@@ -537,11 +549,61 @@ def ols_regression(df: pd.DataFrame) -> dict:
     print(f"    (β*={std_betas[3]:.4f}) are the two significant, actionable levers.")
     print(f"    Time Sufficiency and Question Diversity show no independent effect")
     print(f"    after controlling for the other predictors (p > 0.05).")
-    print(f"\n  ⚠  Practical caveat: R²=0.010 means 99% of GCS variance is driven")
+    print(f"\n  ⚠  Practical caveat: R²={r2:.4f} means ~{(1-r2)*100:.0f}% of GCS variance is driven")
     print(f"     by factors outside this model (learner motivation, prior education,")
     print(f"     school quality). Recommendations should be framed as 'necessary")
     print(f"     but not sufficient' conditions for adoption success.")
     print()
+
+    # ── MNAR Sensitivity Analysis — regression on TOPIK-takers only ─────────
+    # ~36% of score data was MNAR-imputed (non-takers couldn't rate exam sections).
+    # This check re-runs the regression on the 3,048 respondents who have actually
+    # taken TOPIK, where all score data is organic (not imputed). If the significant
+    # predictors and direction of effects are consistent, the full-sample results
+    # are robust to the imputation decision.
+    print("  " + "─" * 70)
+    print("  MNAR SENSITIVITY CHECK — Regression on TOPIK-takers only")
+    print("  (Excludes respondents whose score data was median-imputed)")
+    print("  " + "─" * 70)
+    takers = df[df["topik_experience"] == "there is"].copy()
+    n_takers = len(takers)
+    y_t    = takers["gcs"].values
+    Xr_t   = takers[predictors].values
+    X_t    = np.column_stack([np.ones(n_takers), Xr_t])
+    beta_t, _, _, _ = lstsq(X_t, y_t, rcond=None)
+    yp_t   = X_t @ beta_t
+    res_t  = y_t - yp_t
+    ssr_t  = (res_t**2).sum()
+    sst_t  = ((y_t - y_t.mean())**2).sum()
+    r2_t   = 1 - ssr_t / sst_t
+    mse_t  = ssr_t / (n_takers - X_t.shape[1])
+    se_t   = np.sqrt(np.diag(np.linalg.inv(X_t.T @ X_t)) * mse_t)
+    t_t    = beta_t / se_t
+    p_t    = 2 * (1 - stats.t.cdf(np.abs(t_t), df=n_takers - X_t.shape[1]))
+    sb_t   = np.array([0.0] + [
+        beta_t[i+1] * takers[pred].std() / takers["gcs"].std()
+        for i, pred in enumerate(predictors)
+    ])
+    print(f"\n  N (TOPIK-takers) = {n_takers:,}  |  R² = {r2_t:.4f}")
+    print(f"\n  {'Predictor':<42} {'β*':>8} {'t':>8} {'p':>10} {'Sig':>4}  {'Consistent?':>12}")
+    print("  " + "─" * 96)
+    names_t = ["(Intercept)"] + predictors
+    full_sig = [pv < 0.05 for pv in p_vals]
+    for i, (name, bs, t_val, pv) in enumerate(zip(names_t, sb_t, t_t, p_t)):
+        sig  = "***" if pv < 0.001 else ("**" if pv < 0.01 else ("*" if pv < 0.05 else "ns"))
+        if i == 0:
+            consistent = "—"
+        else:
+            full_was_sig = p_vals[i] < 0.05
+            taker_is_sig = pv < 0.05
+            same_dir     = np.sign(beta[i]) == np.sign(beta_t[i])
+            consistent   = "✓ Robust" if (full_was_sig == taker_is_sig and same_dir) else "⚠ Changed"
+        print(f"  {name:<42} {bs:>8.4f} {t_val:>8.3f} {pv:>10.3e} {sig:>4}  {consistent:>12}")
+    print()
+    print("  Sensitivity conclusion: if significance pattern and sign are consistent")
+    print("  across both samples, full-sample results are robust to MNAR imputation.")
+    print()
+
     return {
         "beta": beta, "std_betas": std_betas, "se": se,
         "t_stats": t_stats, "p_vals": p_vals,
@@ -682,7 +744,7 @@ def plot_opportunity_gap(proj: dict, df: pd.DataFrame, out: str) -> None:
     key   = "Strong Exam Breadth Approval (Diversity ≥4)"
     p_dem = proj[key]["p"]
 
-    # Prior exam-taker rate = existing "supply" proxy (59.6% have taken TOPIK)
+    # Prior exam-taker rate = existing "supply" proxy (computed live from cleaned dataset)
     topik_exp_rate = (df["topik_experience"] == "there is").mean()
 
     categories   = ["Prior TOPIK\nExposure\n(Supply Proxy)", "Positive Exam\nBreadth Approval\n(Demand Signal)"]
@@ -711,7 +773,7 @@ def plot_opportunity_gap(proj: dict, df: pd.DataFrame, out: str) -> None:
 
     ax.set_ylim(0, 100)
     ax.set_ylabel("Percentage of Respondents (%)", labelpad=8)
-    ax.set_title("The Opportunity Gap\nDemand exceeds prior exposure by 19.2pp",
+    ax.set_title(f"The Opportunity Gap\nDemand exceeds prior exposure by {gap:.1f}pp",
                  color=C_NAVY)
     ax.axhline(50, color=C_GREY, linewidth=0.8, linestyle=":", alpha=0.5)
     ax.text(1.55, 50.8, "50% threshold", fontsize=8, color=C_GREY)
@@ -766,8 +828,8 @@ def plot_opportunity_gap(proj: dict, df: pd.DataFrame, out: str) -> None:
         arrowprops=dict(arrowstyle="->", color=C_NAVY, lw=1.3)
     )
 
-    ax2.set_title("Projected National Beneficiaries — 2024 to 2028\n"
-                  "Based on 78.8% Exam Breadth Approval, 95% Wilson CI",
+    ax2.set_title(f"Projected National Beneficiaries — 2024 to 2028\n"
+                  f"Based on {proj[key]['p']:.1%} Exam Breadth Approval, 95% Wilson CI",
                   color=C_NAVY)
     ax2.set_xlabel("Year")
     ax2.set_ylabel("Estimated Benefiting Students")
