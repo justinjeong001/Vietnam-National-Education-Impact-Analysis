@@ -25,7 +25,7 @@ The study was structured as a strategic pilot (N=5,114) designed to generate sta
 
 **Headline outcomes:**
 
-- **854,059 – 878,707 students** projected to benefit under the national rollout (95% Wilson CI)
+- **850,131 – 875,121 students** projected to benefit under the national rollout (95% Wilson CI)
 - **Two statistically significant implementation levers** identified via OLS multiple regression (p < 0.001)
 - **No evidence of systematic instrument bias** across diverse learner profiles, supporting the equitable design claim central to the Ministerial Decree
 - Findings submitted as the quantitative evidence base to both MoE Korea and the Vietnamese National Assembly education committee
@@ -43,10 +43,10 @@ topik-policy-analysis/
 ├── topik_policy_case.py           # Module 2: Regression, reliability, projections, viz
 │
 ├── outputs/
-│   ├── 01_correlation_heatmap.png
-│   ├── 02_gcs_distribution.png
-│   ├── 03_policy_impact_projection.png
-│   ├── 04_anova_learning_duration.png
+│   ├── 01_respondent_profile.png
+│   ├── 02_learning_background.png
+│   ├── 03_score_overview.png
+│   ├── 04_topik_purpose_breakdown.png
 │   ├── 05_fairness_consistency_plot.png
 │   ├── 06_opportunity_gap.png
 │   └── 07_regression_drivers.png
@@ -65,7 +65,7 @@ This study applies a multi-stage quantitative pipeline consistent with **ADSp (A
 | Procedure | Technique | Rationale |
 |---|---|---|
 | Missing value treatment | **Median imputation** | Robust to bounded Likert scale [1–5]; preserves distributional shape; preferred over mean for ordinal data |
-| Duplicate detection | Row-level hash audit | 81 duplicate records identified and flagged |
+| Duplicate detection | Row-level hash audit | 81 duplicate records identified and removed |
 | Ordinal encoding | Manual mapping | 5-tier learning duration converted to ordered integer scale for regression compatibility |
 | Feature construction | **Weighted composite score** | Global Competency Score (GCS) engineered as weighted average: Listening 30%, Reading 30%, Writing 25%, Speaking 15% — consistent with official TOPIK I/II mark allocation |
 | Standardisation | **Z-score normalisation** | Applied across all 9 score dimensions (ddof=1) to ensure comparability in multivariate analysis |
@@ -93,7 +93,7 @@ This study applies a multi-stage quantitative pipeline consistent with **ADSp (A
 | Procedure | Technique | Result |
 |---|---|---|
 | Adoption rate estimation | **Wilson Score Interval** (Brown, Cai & DasGupta, 2001) | p̂ = 78.8%, 95% CI: [77.6%, 79.9%] |
-| National projection | CI-scaled population extrapolation | 854,059 – 878,707 beneficiaries (N = 1,100,000) |
+| National projection | CI-scaled population extrapolation | 850,131 – 875,121 beneficiaries (N = 1,100,000) |
 | Interval choice rationale | Wilson vs. Wald | Wilson selected for policy-grade accuracy; Wald interval is unreliable for proportions near 0.5–0.8 at large N |
 
 ### Stage 5 — Driver Identification
@@ -102,7 +102,7 @@ This study applies a multi-stage quantitative pipeline consistent with **ADSp (A
 |---|---|---|
 | Explanatory model | **OLS Multiple Regression** (least squares via `numpy.linalg.lstsq`) | R² = 0.010, Adj. R² = 0.009 |
 | Significance testing | t-statistics with manual SE from (XᵀX)⁻¹ | 2 of 4 predictors significant at p < 0.001 |
-| Effect size | Standardised beta coefficients (β\*) | Instruction Clarity β\* = 0.069; Question Count β\* = 0.068 |
+| Effect size | Standardised beta coefficients (β\*) | Instruction Clarity β\* = 0.067; Question Count β\* = 0.066 |
 | Diagnostic | Residual variance attribution | R² = 0.010 reported transparently; 99% of GCS variance attributed to individual learner factors outside the survey instrument scope |
 
 ---
@@ -125,20 +125,20 @@ The OLS regression identifies two **statistically significant, actionable levers
 |---|---|---|---|
 | **Instruction Clarity** | 0.069 | p < 0.001 | Invest in bilingual exam orientation, standardised teacher briefing materials, and Vietnamese-language TOPIK preparation guides |
 | **Question Count Quality** | 0.068 | p < 0.001 | Ensure transparent item rubrics, balanced domain coverage, and structured pre-release item auditing |
-| Exam Time Sufficiency | 0.003 | p = 0.822 | No intervention indicated; time allocation is not a significant driver after controlling for other factors |
-| Question Diversity | 0.020 | p = 0.154 | Monitor; not independently significant in multivariate context |
+| Exam Time Sufficiency | 0.001 | p = 0.822 | No intervention indicated; time allocation is not a significant driver after controlling for other factors |
+| Question Diversity | 0.021 | p = 0.154 | Monitor; not independently significant in multivariate context |
 
 > **Practical caveat:** R² = 0.010 means that the two significant predictors explain approximately 1% of GCS variance. The remaining 99% is attributable to individual learner factors — motivation, prior education quality, school resources — that fall outside the survey instrument's scope. Implementation recommendations should be framed as necessary-but-not-sufficient conditions for adoption success, not as guaranteed performance levers.
 
 ### Finding 3 — National Demand Signal
 
-A **78.8% pilot approval rate** on exam breadth and diversity (Question Diversity Rating ≥ 4/5), compared to a **59.6% prior TOPIK exposure rate**, produces a **19.2 percentage-point opportunity gap** — the central metric of the MoET business case. Projected to the 1.1M national student base:
+A **78.4% pilot approval rate** on exam breadth and diversity (Question Diversity Rating ≥ 4/5), compared to a **59.6% prior TOPIK exposure rate**, produces a **18.8 percentage-point opportunity gap** — the central metric of the MoET business case. Projected to the 1.1M national student base:
 
 | Scenario | Students Benefiting |
 |---|---|
-| Lower bound (CI low, 77.6%) | 854,059 |
-| **Point estimate (78.8%)** | **866,621** |
-| Upper bound (CI high, 79.9%) | 878,707 |
+| Lower bound (CI low, 77.6%) | 850,131 |
+| **Point estimate (78.8%)** | **862,865** |
+| Upper bound (CI high, 79.9%) | 875,121 |
 
 ---
 
@@ -148,10 +148,10 @@ All figures are generated programmatically and saved to `/outputs/`. The pipelin
 
 | # | Figure | Purpose |
 |---|---|---|
-| 01 | **Correlation Heatmap** | Pearson r matrix across all 8 survey dimensions |
-| 02 | **GCS Distribution** | KDE + histogram of Global Competency Score with policy threshold band |
-| 03 | **Policy Impact Projection** | Dual-panel: projected adopters bar + 2024–2028 phased rollout with CI band |
-| 04 | **ANOVA Boxplot** | Learning duration × Writing Appropriateness with group-level mean markers |
+| 01 | **Respondent Profile** | Gender donut + age histogram with KDE overlay |
+| 02 | **Learning Background** | Study duration breakdown + TOPIK experience rate |
+| 03 | **Score Overview** | Diverging bar chart — all 8 dimensions vs neutral midpoint |
+| 04 | **Purpose Breakdown** | Why Vietnamese students take TOPIK (multi-choice parsed) |
 | 05 | **Fairness Consistency Plot** | Per-domain mean scores across duration bands with 95% CI ribbons |
 | 06 | **Opportunity Gap** | Demand vs. supply gap with national projection timeline |
 | 07 | **Regression Drivers** | Forest-plot standardised betas + Ministry implementation guidance matrix |
@@ -170,14 +170,8 @@ The flat trajectory of Listening, Reading, and Writing appropriateness scores ac
 
 ### Environment
 
-```bash
 Python >= 3.9
-numpy >= 1.24
-pandas >= 2.0
-scipy >= 1.11
-matplotlib >= 3.7
-seaborn >= 0.12
-```
+# See requirements.txt for pinned library versions
 
 ### Installation & Execution
 
@@ -187,7 +181,7 @@ git clone https://github.com/<your-username>/topik-policy-analysis.git
 cd topik-policy-analysis
 
 # Install dependencies
-pip install numpy pandas scipy matplotlib seaborn
+pip install -r requirements.txt
 
 # Run Phase 1: Data integrity, feature engineering, ANOVA
 python topik_analysis.py
