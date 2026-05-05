@@ -989,6 +989,13 @@ def plot_regression_drivers(reg: dict, out: str) -> None:
         ax2.text(2.6, y_top - 0.7, desc, ha="left", va="center",
                  color="#1a1a2e", fontsize=8.5, linespacing=1.5)
 
+    # R² caveat footnote inside the guidance panel — prevents overconfident reading
+    ax2.text(5.0, 0.35,
+             f"Note: R² = {reg['r2']:.4f} — levers are statistically significant but explain ~1% of variance.\n"
+             "Instruction Clarity is robust (MNAR check: p=0.022). Question Count is directional (p=0.207 on takers only).",
+             ha="center", va="center", color=C_GREY, fontsize=7.5,
+             style="italic", linespacing=1.4)
+
     fig.suptitle("Regression Analysis — Identifying Implementation Levers for MoET",
                  fontsize=13, fontweight="bold", color=C_NAVY, y=1.01)
     fig.text(0.5, -0.01, FOOTER, ha="center", fontsize=8, color=C_GREY)
