@@ -67,7 +67,7 @@ This study applies a multi-stage quantitative pipeline consistent with **ADSp (A
 | Missing value treatment | **Median imputation** | Robust to bounded Likert scale [1–5]; preserves distributional shape; preferred over mean for ordinal data |
 | Duplicate detection | Row-level hash audit | 81 duplicate records identified and removed |
 | Ordinal encoding | Manual mapping | 5-tier learning duration converted to ordered integer scale for regression compatibility |
-| Feature construction | **Weighted composite score** | Global Competency Score (GCS) engineered as weighted average: Listening 30%, Reading 30%, Writing 25%, Speaking 15% — consistent with official TOPIK I/II mark allocation |
+| Feature construction | **Weighted composite score** | Global Competency Score (GCS) engineered as weighted average: Listening 30%, Reading 30%, Writing 25%, Speaking 15% — survey instrument weights giving proportional emphasis to the four assessed dimensions. Note: TOPIK does not include a speaking component; the Speaking dimension captures student perception of a hypothetical section and is a survey construct, not a reflection of actual TOPIK scoring. GCS is therefore a holistic perception index. |
 | Standardisation | **Z-score normalisation** | Applied across all 9 score dimensions (ddof=1) to ensure comparability in multivariate analysis |
 
 ### Stage 2 — Reliability & Scale Analysis
@@ -84,9 +84,10 @@ This study applies a multi-stage quantitative pipeline consistent with **ADSp (A
 
 | Procedure | Technique | Result |
 |---|---|---|
-| Group comparison | **One-Way ANOVA** | F(4, 5109) = 0.528, p = 0.715, η² = 0.0004 |
-| Effect size | Eta-squared (η²) | Negligible (< 0.01 threshold) |
-| Pairwise follow-up | **Welch t-test** (Bonferroni α = 0.005) | Cohen's d = 0.032 between shortest and longest exposure groups |
+| Group comparison | **One-Way ANOVA** (per domain, Bonferroni-corrected) | Listening: F(4,5028)=1.973, p=0.096, η²=0.0016; Reading: F(4,5028)=2.972, p=0.018, η²=0.0024; Writing: F(4,5028)=0.611, p=0.655, η²=0.0005 |
+| Correction | Bonferroni α = 0.05/3 = 0.0167 | No domain reaches significance after correction |
+| Effect size | Eta-squared (η²) | Max η² = 0.0024 across all domains (negligible, < 0.01 threshold) |
+| Pairwise follow-up | **Welch t-test** (Bonferroni α = 0.0167) | Max Cohen's d = 0.115 (Listening, extreme groups) — negligible practical effect |
 
 ### Stage 4 — Predictive Inference & Population Modelling
 
@@ -100,10 +101,11 @@ This study applies a multi-stage quantitative pipeline consistent with **ADSp (A
 
 | Procedure | Technique | Result |
 |---|---|---|
-| Explanatory model | **OLS Multiple Regression** (least squares via `numpy.linalg.lstsq`) | R² = 0.010, Adj. R² = 0.009 |
+| Explanatory model | **OLS Multiple Regression** (least squares via `numpy.linalg.lstsq`) | R² = 0.0097, Adj. R² = 0.0087 |
 | Significance testing | t-statistics with manual SE from (XᵀX)⁻¹ | 2 of 4 predictors significant at p < 0.001 |
 | Effect size | Standardised beta coefficients (β\*) | Instruction Clarity β\* = 0.067; Question Count β\* = 0.066 |
-| Diagnostic | Residual variance attribution | R² = 0.010 reported transparently; 99% of GCS variance attributed to individual learner factors outside the survey instrument scope |
+| Diagnostic | Residual variance attribution | R² = 0.0097 reported transparently; ~99% of GCS variance attributed to individual learner factors outside the survey instrument scope |
+| Robustness | **MNAR sensitivity analysis** | Regression re-run on TOPIK-takers only (N=3,048, organic scores). Instruction Clarity remains significant (p=0.022, ✓ Robust). Question Count attenuates to ns in the taker-only sample (p=0.207, ⚠ interpret with caution). Full-sample results for Question Count should be treated as directional, not confirmatory. |
 
 ---
 
@@ -113,9 +115,9 @@ This study applies a multi-stage quantitative pipeline consistent with **ADSp (A
 
 > *TOPIK perception does not vary significantly across students with different lengths of Korean language study.*
 
-The ANOVA result (F = 0.528, p = 0.715, η² = 0.0004) shows that mean exam appropriateness scores are essentially flat across all five learning-duration bands — from students with less than six months of exposure to those with more than two years. The negligible effect size (η² < 0.001) means that learning background explains effectively zero variance in how students perceive the exam's fairness and appropriateness.
+The per-domain Bonferroni-corrected ANOVA results (Listening: F(4,5028)=1.973, p=0.096, η²=0.0016; Reading: F(4,5028)=2.972, p=0.018, η²=0.0024; Writing: F(4,5028)=0.611, p=0.655, η²=0.0005) show that no domain reaches significance after Bonferroni correction (α=0.0167 for 3 simultaneous tests). The maximum effect size across all domains (η²=0.0024) is negligible — well below the conventional 0.01 threshold — meaning that learning background explains effectively zero variance in how students perceive the exam's fairness and appropriateness.
 
-**Policy implication:** TOPIK does not systematically advantage experienced learners over beginners. This is a meaningful equity property for a national graduation instrument applied to a diverse student population of 1.1 million. The Ministry can represent this finding accurately as: *"No evidence of duration-based bias was detected in the pilot cohort."*
+**Policy implication:** TOPIK does not systematically advantage experienced learners over beginners. This is a meaningful equity property for a national graduation instrument applied to a diverse student population of 1.1 million. The Ministry can represent this finding accurately as: *"No evidence of duration-based bias was detected in the pilot cohort across any of the three primary TOPIK domains after Bonferroni correction."*
 
 ### Finding 2 — Implementation Levers for MoET
 
@@ -123,16 +125,16 @@ The OLS regression identifies two **statistically significant, actionable levers
 
 | Lever | β* | p-value | Recommended Action |
 |---|---|---|---|
-| **Instruction Clarity** | 0.069 | p < 0.001 | Invest in bilingual exam orientation, standardised teacher briefing materials, and Vietnamese-language TOPIK preparation guides |
-| **Question Count Quality** | 0.068 | p < 0.001 | Ensure transparent item rubrics, balanced domain coverage, and structured pre-release item auditing |
-| Exam Time Sufficiency | 0.001 | p = 0.822 | No intervention indicated; time allocation is not a significant driver after controlling for other factors |
-| Question Diversity | 0.021 | p = 0.154 | Monitor; not independently significant in multivariate context |
+| **Instruction Clarity** | 0.067 | p < 0.001 | Invest in bilingual exam orientation, standardised teacher briefing materials, and Vietnamese-language TOPIK preparation guides |
+| **Question Count Quality** | 0.066 | p < 0.001 | Ensure transparent item rubrics, balanced domain coverage, and structured pre-release item auditing |
+| Exam Time Sufficiency | 0.001 | p = 0.938 | No intervention indicated; time allocation is not a significant driver after controlling for other factors |
+| Question Diversity | 0.021 | p = 0.143 | Monitor; not independently significant in multivariate context |
 
-> **Practical caveat:** R² = 0.010 means that the two significant predictors explain approximately 1% of GCS variance. The remaining 99% is attributable to individual learner factors — motivation, prior education quality, school resources — that fall outside the survey instrument's scope. Implementation recommendations should be framed as necessary-but-not-sufficient conditions for adoption success, not as guaranteed performance levers.
+> **Practical caveat:** R² = 0.0097 means that the two significant predictors explain approximately 1% of GCS variance. The remaining ~99% is attributable to individual learner factors — motivation, prior education quality, school resources — that fall outside the survey instrument's scope. Additionally, a MNAR sensitivity analysis re-running the regression on TOPIK-takers only (N=3,048) shows that Instruction Clarity remains robustly significant (p=0.022), while Question Count attenuates to non-significance (p=0.207). Implementation recommendations should therefore prioritise Instruction Clarity as the more robustly evidenced lever, while treating Question Count as a directional signal warranting further investigation.
 
 ### Finding 3 — National Demand Signal
 
-A **78.4% pilot approval rate** on exam breadth and diversity (Question Diversity Rating ≥ 4/5), compared to a **59.6% prior TOPIK exposure rate**, produces a **18.8 percentage-point opportunity gap** — the central metric of the MoET business case. Projected to the 1.1M national student base:
+A **78.4% pilot approval rate** on exam breadth and diversity (Question Diversity Rating ≥ 4/5), compared to a **60.6% prior TOPIK exposure rate** (computed from the cleaned, deduplicated dataset of N=5,033), produces a **~17.8 percentage-point opportunity gap** — the central metric of the MoET business case. Projected to the 1.1M national student base:
 
 | Scenario | Students Benefiting |
 |---|---|
