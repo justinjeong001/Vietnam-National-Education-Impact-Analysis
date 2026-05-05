@@ -9,7 +9,7 @@
 ![License](https://img.shields.io/badge/License-Ministry_Internal-red?style=for-the-badge)
 ![Status](https://img.shields.io/badge/Policy_Status-Decree_Issued_Jan_2026-success?style=for-the-badge)
 
-**A bilateral quantitative feasibility study commissioned by the Ministry of Education, Republic of Korea, to evaluate the strategic integration of TOPIK as a national graduation credit within the Vietnamese secondary education curriculum.**
+**A bilateral quantitative feasibility study commissioned by the Ministry of Education, Republic of Korea, to evaluate the strategic integration of TOPIK as a national graduation credit within the Vietnamese Korean-language learner population — including university students, working professionals, and secondary school students.**
 
 [Executive Summary](#-executive-summary) · [Methodology](#-statistical-methodology) · [Key Findings](#-key-strategic-findings) · [Visualisations](#-visualisations) · [Technical Stack](#-technical-implementation) · [Data Integrity](#-data-integrity-statement)
 
@@ -19,9 +19,11 @@
 
 ## Executive Summary
 
-This project constitutes a **Global Scale Policy Feasibility Study** conducted in support of the January 2026 Ministerial Decree recognising the Test of Proficiency in Korean (TOPIK) as a formal graduation credit within Vietnam's national secondary education framework — a policy decision affecting an estimated **1.1 million students** across the Vietnamese national curriculum.
+This project constitutes a **Global Scale Policy Feasibility Study** conducted in support of the January 2026 Ministerial Decree recognising the Test of Proficiency in Korean (TOPIK) as a formal graduation credit within Vietnam's national education framework — a policy decision affecting an estimated **1.1 million students** across the Vietnamese curriculum.
 
-The study was structured as a strategic pilot (N=5,114) designed to generate statistically defensible projections at the population level. The core objective was to provide the Vietnamese Ministry of Education and Training (MoET) and the Korean Ministry of Education (MoE) with a rigorous quantitative evidence base capable of resolving a bilateral policy deadlock on standardised testing integrity and equitable instrument adoption.
+The study was structured as a strategic pilot (N=5,114; 5,033 after deduplication) designed to generate statistically defensible projections at the population level. The core objective was to provide the Vietnamese Ministry of Education and Training (MoET) and the Korean Ministry of Education (MoE) with a rigorous quantitative evidence base capable of resolving a bilateral policy deadlock on standardised testing integrity and equitable instrument adoption.
+
+> **Sample composition note:** The pilot cohort reflects the realistic Vietnamese TOPIK learner population: adult learners predominate (median age 25, mean 26.3 years), with 83.0% female respondents (4,177 female / 856 male) — consistent with the demographic profile of Korean-language study in Vietnam, where female university students and young professionals constitute the primary learner base. Secondary school students under 18 represent 0.5% of the sample (n=27). Population projections should therefore be interpreted as applicable to the Vietnamese Korean-language learner cohort broadly, with the caveat that the adult sample may not fully represent the attitudes of secondary school-age students specifically.
 
 **Headline outcomes:**
 
@@ -201,20 +203,38 @@ The execution environment did not support network package installation. The cust
 The Wald interval (p̂ ± z√(p̂(1-p̂)/n)) is known to underperform at proportions away from 0.5 and produces intervals that can fall outside [0,1]. For policy documents where interval accuracy directly informs legislative projections, the Wilson Score Interval (Brown, Cai & DasGupta, 2001) is the appropriate standard.
 
 **Why median imputation over mean?**
-Likert-scale responses are bounded [1,5] and frequently right- or left-skewed. Mean imputation on asymmetric distributions inflates group-level variance, which directly affects ANOVA F-statistics. Median imputation is robust to this; it preserves the distributional shape of each item without introducing bias into the group comparison.
+Likert-scale responses are bounded [1,5] and frequently right- or left-skewed. Mean imputation on asymmetric distributions inflates group-level variance, which directly affects ANOVA F-statistics. Median imputation is robust to this; it preserves the distributional shape of each item without introducing bias into the group comparison. The known limitation is that when the median coincides with the scale midpoint (3.0 for most items), imputation is functionally equivalent to assigning "no opinion" to missing records — conservatively biasing findings toward neutrality. This is acceptable for a policy document seeking to avoid false positives, but should be noted as a constraint on the strength of positive claims.
 
 ---
 
 ## Data Integrity Statement
 
-The dataset (N=5,114) was collected under the oversight of the Ministry of Education, Republic of Korea, as part of a structured nationwide pilot study targeting Vietnamese secondary school students. The following data governance protocols were applied throughout this analysis:
+The dataset (N=5,114 raw; 5,033 after deduplication of 81 exact-duplicate records) was collected under the oversight of the Ministry of Education, Republic of Korea, as part of a structured nationwide pilot study of Vietnamese Korean-language learners. The following data governance protocols were applied throughout this analysis:
 
 - **De-identification:** All records were received in anonymised form. No names, student IDs, school identifiers, or geographic specifics below the national level are present in the dataset or any project output.
 - **Structural audit:** The dataset was subjected to a full schema audit at ingestion — dtype classification, null inventory, and duplicate detection — prior to any analytical procedure. Results are logged at pipeline execution.
-- **Imputation transparency:** All missing-value treatment decisions (median imputation on Likert score columns) are documented in code comments with explicit methodological rationale. Imputation scope and residual null counts are printed at runtime.
-- **Reproducibility:** All random seeds and analytical decisions are deterministic. Given the same input CSV, the pipeline produces byte-identical outputs.
+- **Imputation transparency:** Score columns (Likert [1–5]) contain structurally missing data driven by TOPIK non-experience (MNAR pattern confirmed: 55.5% missingness among non-takers vs. 21.1% among takers). Median imputation was applied, using column-level medians ranging from 2.0 to 4.0 depending on the item. Because the median for most score dimensions is 3.0 (the scale midpoint), imputation conservatively biases findings toward neutrality — a known limitation that is partially addressed by the MNAR sensitivity analysis (regression re-run on takers-only, N=3,048).
+- **Reproducibility:** All analytical decisions are fully deterministic. Given the same input CSV, the pipeline produces byte-identical outputs across platforms.
 - **No external data transmission:** The analysis was executed in a closed environment. No data was transmitted to external APIs, cloud services, or third-party analytics platforms.
 - **Repository scope:** This repository contains only the analysis scripts and generated figures. The source dataset is not included and is held under Ministry internal data governance protocols.
+
+---
+
+## Limitations
+
+The following limitations are disclosed in the interest of methodological transparency and should be considered when interpreting findings for policy purposes:
+
+1. **Adult-dominant sample.** The cohort median age is 25 (mean 26.3). Secondary school students under 18 represent 0.5% (n=27) of respondents. Findings are most accurately generalised to Vietnamese adult Korean-language learners; secondary school-specific attitudes may differ.
+
+2. **Gender imbalance.** 83.0% of respondents are female (4,177/5,033). This is consistent with known demographics of Korean-language study in Vietnam, but it means the sample is not nationally representative by gender. Male learner perceptions are underrepresented.
+
+3. **Median imputation on structurally missing data (MNAR).** Score columns contain 21–55% missingness depending on TOPIK experience status. Imputed values equal the scale midpoint (3.0) for most dimensions, which conservatively biases reported satisfaction scores toward neutrality. The MNAR sensitivity analysis (takers-only regression, N=3,048) provides a partial robustness check.
+
+4. **Low explanatory power of the regression model.** R² = 0.0097. The two significant predictors are statistically reliable but practically modest in effect (β* ≈ 0.067 each). The majority of GCS variance is driven by individual-level factors outside the scope of the survey instrument. Regression findings are best treated as directional guidance rather than precise effect estimates.
+
+5. **Cross-sectional survey design.** All data was collected at a single time point. Causal inference (e.g., "improving instruction clarity *causes* higher GCS") cannot be established from this design; findings are associational.
+
+6. **Self-reported measures.** All score ratings reflect perceived appropriateness, not objective performance. Respondent interpretation of Likert anchors may vary.
 
 ---
 
